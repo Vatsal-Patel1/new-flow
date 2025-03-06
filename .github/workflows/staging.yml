@@ -1,0 +1,37 @@
+name: Staging Deployment
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Shopify Staging
+        env:
+          SHOPIFY_THEME_ID: ${{ secrets.SHOPIFY_STAGING_THEME_ID }}
+          SHOPIFY_API_KEY: ${{ secrets.SHOPIFY_API_KEY }}
+          SHOPIFY_PASSWORD: ${{ secrets.SHOPIFY_PASSWORD }}
+          SHOPIFY_STORE: ${{ secrets.SHOPIFY_STORE }}
+        run: |
+          npx shopify theme push --theme $SHOPIFY_THEME_ID --password $SHOPIFY_PASSWORD --store $SHOPIFY_STORE
+
+      - name: Notify on Deployment
+        uses: rtCamp/action-slack-notify@v2
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          message: "Staging deployment successful. Ready for QA."
+
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Theme Preview Link
+        env:
+          SHOPIFY_STORE: ${{ secrets.SHOPIFY_STORE }}
+        run: |
+          echo "Staging preview: https://${SHOPIFY_STORE}?preview_theme_id=${{ secrets.SHOPIFY_STAGING_THEME_ID }}"
