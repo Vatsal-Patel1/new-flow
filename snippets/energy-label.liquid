@@ -1,0 +1,56 @@
+{% comment %}
+  Renders an energy label
+
+  Accepts:
+  - product: {Object} Product Liquid object (optional)
+
+  Usage:
+  {% render 'energy-lable' %}
+{% endcomment %}
+
+{% if product.metafields.energy.eprel_id %}
+  <energy-label
+    class="energy-label-section"
+    data-section-id="{{ section.id }}"
+    data-product-id="{{ product.id }}"
+    data-eprel-id="{{ product.metafields.energy.eprel_id }}"
+  >
+    {% capture labeltext %}
+      productdatablad
+    {% endcapture %}
+
+    <div class="energy-label__container">
+      <div class="energy-label__icon">
+        <modal-opener data-modal="#popup-modal__energy-label">
+          <button type="button" name="add" class="energy-label__icon-button" aria-haspopup="dialog"></button>
+        </modal-opener>
+      </div>
+      <div class="energy-label__text">
+        <a href="javascript:void(0)" target="_blank" class="energy-label__text-label">{{ labeltext }}</a>
+      </div>
+    </div>
+
+    <!-- Popup Modal -->
+    <modal-dialog id="popup-modal__energy-label" class="product-popup-modal addons shopify-section">
+      <div
+        role="dialog"
+        aria-modal="true"
+        class="product-popup-modal__content add-on-content"
+        tabindex="-1">
+        <div class="product-popup-modal__content-info add-on-products">
+          <modal-header >
+            <button
+            id="ModalClose-addon"
+            type="button"
+            class="product-popup-modal__toggle"
+            aria-label="{{ 'accessibility.close' | t }}">
+              {{- 'icon-close.svg' | inline_asset_content -}}
+            </button>
+          </modal-header>
+          <modal-body class="popup-model-body"></modal-body>
+        </div>
+      </div>
+    </modal-dialog>
+  </energy-label>
+{% endif %}
+
