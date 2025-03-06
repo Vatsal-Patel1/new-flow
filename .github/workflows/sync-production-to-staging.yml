@@ -1,0 +1,36 @@
+name: Sync Production to Staging
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Staging Branch
+        uses: actions/checkout@v4
+        with:
+          ref: staging
+          fetch-depth: 0
+
+      - name: Add Production Remote
+        run: |
+          git remote add production https://github.com/${{ github.repository }}.git
+          git fetch production production
+
+      - name: Merge Production into Staging
+        run: |
+          git merge production/production --no-ff --no-edit || echo "Merge conflicts detected."
+
+      - name: Push Merged Changes
+        run: |
+          git push origin staging || echo "Push failed. Manual conflict resolution required."
+
+      - name: Notify on Merge Conflict
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          message: "Merge conflict detected in production-to-staging sync. Manual intervention required."
