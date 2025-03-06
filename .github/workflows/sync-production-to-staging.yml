@@ -27,10 +27,3 @@ jobs:
       - name: Push Merged Changes
         run: |
           git push origin staging || echo "Push failed. Manual conflict resolution required."
-
-      - name: Notify on Merge Conflict
-        if: failure()
-        uses: rtCamp/action-slack-notify@v2
-        with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
-          message: "Merge conflict detected in production-to-staging sync. Manual intervention required."
