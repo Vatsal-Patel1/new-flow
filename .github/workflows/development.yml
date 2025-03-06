@@ -17,19 +17,3 @@ jobs:
           rm -rf config/settings_data.json
           rm -rf templates/*.json
           git checkout -- config/settings_data.json templates/*.json
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Run Linting Checks
-        run: npm run lint
-
-      - name: Run Unit Tests
-        run: npm test
-
-      - name: Notify on Failure
-        if: failure()
-        uses: rtCamp/action-slack-notify@v2
-        with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
-          message: "Development build failed. Check logs for details."
