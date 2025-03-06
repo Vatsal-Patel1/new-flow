@@ -1,0 +1,49 @@
+{% if product %}
+  <div
+    class="small-product-card"
+    data-id="{{ product.variants.first.id }}"
+    data-price="{{ product.price }}"
+  >
+    <a class="small-product-card__image-wrapper" href="{{ product.url }}" title="{{ product.title }}">
+      <img
+        src="{{ product.featured_image | image_url }}"
+        width="auto"
+        height="150"
+        alt="{{ product.title }}"
+        class="small-product-card__image"
+      >
+    </a>
+    <div class="content-block">
+      <a class="text-container" href="{{ product.url }}" title="{{ product.title }}">
+        <div class="text-content">
+          <h3 class="small-product-card__title" data-bind="html:title">{{ product.title }}</h3>
+          <h4 class="small-product-card__description" data-bind="html:description">
+            {% if product.metafields.custom.sort_description != blank %}
+              {{ product.metafields.custom.sort_description }}
+            {% endif %}
+          </h4>
+        </div>
+        <div class="recommendations-reviews">
+          <div class="recommendations-rating-stars">
+            <div
+              class="rating-stars image-rating-1-0"
+            >
+              <!-- Start of Judge.me code -->
+              <div class="jdgm-widget jdgm-preview-badge">
+                {{ product.metafields.judgeme.badge }}
+              </div>
+              <!-- End of Judge.me code -->
+            </div>
+          </div>
+        </div>
+      </a>
+      <div class="box-bottom">
+        <div class="price-wrapper">
+          <div class="small-product-card__price">
+            <span>{% render 'price', product: product %}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}

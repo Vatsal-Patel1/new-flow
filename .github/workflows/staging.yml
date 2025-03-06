@@ -6,32 +6,39 @@ on:
       - staging
 
 jobs:
-  deploy:
+  merge:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout Staging Branch
         uses: actions/checkout@v4
-
-      - name: Deploy to Shopify Staging
-        env:
-          SHOPIFY_THEME_ID: ${{ secrets.SHOPIFY_STAGING_THEME_ID }}
-          SHOPIFY_API_KEY: ${{ secrets.SHOPIFY_API_KEY }}
-          SHOPIFY_PRODUCTION_PASSWORD: ${{ secrets.SHOPIFY_PRODUCTION_PASSWORD }}
-          SHOPIFY_PRODUCTION_STORE: ${{ secrets.SHOPIFY_PRODUCTION_STORE }}
-        run: |
-          npx shopify theme push --theme $SHOPIFY_THEME_ID --password $SHOPIFY_PRODUCTION_PASSWORD --store $SHOPIFY_PRODUCTION_STORE
-
-      - name: Notify on Deployment
-        uses: rtCamp/action-slack-notify@v2
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
-          message: "Staging deployment successful. Ready for QA."
+          ref: staging
+          fetch-depth: 0
+
+      - name: Configure Git User
+        run: |
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"
+
+      - name: Add Development Remote
+        run: |
+          git remote add development https://github.com/${{ github.repository }}.git
+          git fetch development development
+
+      - name: Merge Development into Staging (Exclude Unwanted Files)
+        run: |
+          git merge development/development --no-ff --no-edit || echo "Merge conflicts detected."
+          git checkout --ours config/settings_data.json templates/*.json
+
+      - name: Push Merged Changes
+        run: |
+          git push origin staging || echo "Push failed. Manual conflict resolution required."
 
   preview:
     runs-on: ubuntu-latest
     steps:
       - name: Generate Theme Preview Link
         env:
-          SHOPIFY_PRODUCTION_STORE: ${{ secrets.SHOPIFY_PRODUCTION_STORE }}
+          SHOPIFY_STAGING_STORE: ${{ secrets.SHOPIFY_STAGING_STORE }}
         run: |
-          echo "Staging preview: https://${SHOPIFY_PRODUCTION_STORE}?preview_theme_id=${{ secrets.SHOPIFY_STAGING_THEME_ID }}"
+          echo "Staging preview: https://${SHOPIFY_STAGING_STORE}?preview_theme_id=${{ secrets.SHOPIFY_STAGING_THEME_ID }}"
