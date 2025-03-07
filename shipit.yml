@@ -1,0 +1,42 @@
+review:
+  checklist:
+    - Have you merged changes from `main` to `middleware`?
+    - Have you tested on the staging environment?
+    - Have you reviewed the Shopify preview link?
+  monitoring:
+    - image: "https://your-monitoring-service.com/graph"
+      width: 360
+      height: 180
+
+dependencies:
+  override:
+    - npm install
+
+fetch:
+  - curl --silent https://your-shopify-theme-status.com/version
+
+deploy:
+  pre:
+    - script/check-theme-syntax
+    - script/generate-theme-snapshot
+  override:
+    - script/deploy-theme
+  post:
+    - script/notify-deploy-complete
+    - script/post-to-slack
+
+rollback:
+  override:
+    - script/rollback-theme
+
+tasks:
+  lint_theme:
+    action: "Lint Theme Files"
+    description: "Runs Liquid and JSON linting on theme files"
+    steps:
+      - script/lint-theme
+  preview_link:
+    action: "Generate Preview Link"
+    description: "Generates a Shopify theme preview link for review"
+    steps:
+      - script/generate-preview-link
